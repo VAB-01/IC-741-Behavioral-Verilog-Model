@@ -1,0 +1,35 @@
+
+module ic_741_tb;
+
+    real v_plus;
+    real v_minus;
+    real v_cc;
+    real v_ee;
+    wire real v_out;
+
+    ic_741 uut(
+        .v_plus(v_plus),
+        .v_minus(v_minus),
+        .v_cc(v_cc),
+        .v_ee(v_ee),
+        .v_out(v_out)
+    );
+
+    initial begin
+        v_cc = 15.0;
+        v_ee = -15.0;
+
+        $monitor("Time=%0t ns | V+ = %6.4fV | V- = %6.4fV | V_out = %6.3fV", $time, v_plus, v_minus, v_out);
+        
+        v_plus = 0.1; v_minus = 0.0; #10;
+
+        v_plus = 0.0; v_minus = 0.1; #10;
+
+        v_plus = 0.00005; v_minus = 0.0; #10;
+
+        v_plus = 2.5; v_minus = 2.5; #10;
+        
+        $finish;
+    end
+
+endmodule
