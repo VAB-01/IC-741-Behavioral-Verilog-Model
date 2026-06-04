@@ -1,0 +1,31 @@
+module ic_741(
+    input real v_plus,
+    input real v_minus,
+    input real v_cc,
+    input real v_ee,
+    output real v_out
+);
+
+parameter real OPEN_LOOP_GAIN = 200000.0;
+parameter real v_drop = 1.5;
+
+real v_diff;
+real v_ideal_out;
+real max_output;
+real min_output;
+
+always @(*) begin
+    v_diff = v_plus - v_minus;
+    v_ideal_out = v_diff * OPEN_LOOP_GAIN;
+    max_output = v_cc - v_drop;
+    min_output = v_ee + v_drop;
+
+    if (v_ideal_out > max_output)
+        v_out = max_output;
+    else if (v_ideal_out < min_output)
+        v_out = min_output;
+    else
+        v_out = v_ideal_out;
+end
+
+endmodule
