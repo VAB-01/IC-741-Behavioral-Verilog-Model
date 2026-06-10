@@ -7,25 +7,48 @@ module ic_741(
 );
 
 parameter real OPEN_LOOP_GAIN = 200000.0;
-parameter real v_drop = 1.5;
+parameter real VDROP          = 1.5;
+parameter real VOS            = 0.002;
+parameter real SLEW_RATE      = 0.5;
+parameter real ALPHA          = 0.05;
 
 real v_diff;
-real v_ideal_out;
+real v_target;
+real v_internal;
 real max_output;
 real min_output;
+real delta;
 
-always @(*) begin
-    v_diff = v_plus - v_minus;
-    v_ideal_out = v_diff * OPEN_LOOP_GAIN;
-    max_output = v_cc - v_drop;
-    min_output = v_ee + v_drop;
+initial begin
+    v_internal = 0.0;
+    v_out = 0.0;
+end
 
-    if (v_ideal_out > max_output)
-        v_out = max_output;
-    else if (v_ideal_out < min_output)
-        v_out = min_output;
+always begin
+    #1;
+
+    v_diff = (v_plus - v_minus) + VOS;
+
+    v_target = v_diff * OPEN_LOOP_GAIN;
+
+    max_output = v_cc - VDROP;
+    min_output = v_ee + VDROP;
+
+    if(v_target > max_output)
+        v_target = max_output;
+    else if(v_target < min_output)
+        v_target = min_output;
+
+    v_internal = v_internal + ALPHA*(v_target - v_internal);
+
+    delta = v_internal - v_out;
+
+    if(delta > SLEW_RATE)
+        v_out = v_out + SLEW_RATE;
+    else if(delta < -SLEW_RATE)
+        v_out = v_out - SLEW_RATE;
     else
-        v_out = v_ideal_out;
+        v_out = v_internal;
 end
 
 endmodule
